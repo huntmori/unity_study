@@ -12,9 +12,18 @@ public class PlayerController : MonoBehaviour
     //[SerializeField]
     private Rigidbody my_rigidbody;
 
+    [SerializeField]
+    private float look_sensitivity;
+    [SerializeField]
+    private float camera_rotaion_limit;
+    private float current_camera_rotation_x = 0;
+
+    [SerializeField]
+    private Camera main_camera;
     // Start is called before the first frame update
     void Start()
     {
+        
         my_rigidbody = GetComponent<Rigidbody>();
     }
 
@@ -22,6 +31,29 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Move();
+        CameraRotation();
+        CaracterRotation();
+    }
+
+    //좌우회전
+    private void CaracterRotation()
+    {
+        float y_rotation = Input.GetAxisRaw("Mouse X");
+        Vector3 character_rotation_y = new Vector3(0f, y_rotation, 0f) * look_sensitivity;
+        my_rigidbody.MoveRotation(my_rigidbody.rotation * Quaternion.Euler(character_rotation_y));
+        Debug.Log(my_rigidbody.rotation);
+        Debug.Log(my_rigidbody.rotation.eulerAngles);
+    }
+
+    //상하 카메라회전
+    private void CameraRotation()
+    {
+        float x_rotation = Input.GetAxisRaw("Mouse Y");
+        float camera_rotation_x = x_rotation * look_sensitivity;
+        current_camera_rotation_x -= camera_rotation_x;
+        current_camera_rotation_x = Mathf.Clamp(current_camera_rotation_x, -camera_rotaion_limit, camera_rotaion_limit);
+
+        main_camera.transform.localEulerAngles = new Vector3(current_camera_rotation_x, 0f, 0f);
     }
 
     private void Move()
