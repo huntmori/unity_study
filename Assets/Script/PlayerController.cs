@@ -1,12 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 using UnityEngine.Scripting.APIUpdating;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField]
-    private float walk_speed;
+    // 스피드 조정 변수
+    [SerializeField]    private float walk_speed;
+
+    [SerializeField]    private float run_speed;
+                        private float apply_speed;
+
+    // 상태변수
+    private bool is_run = false;
 
     // 강체 - 실제 몸의 역할
     //[SerializeField]
@@ -14,6 +21,8 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private float look_sensitivity;
+
+    // 카메라 한계
     [SerializeField]
     private float camera_rotaion_limit;
     private float current_camera_rotation_x = 0;
@@ -23,16 +32,41 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
         my_rigidbody = GetComponent<Rigidbody>();
+        apply_speed = walk_speed;
     }
 
     // Update is called once per frame
     void Update()
     {
+        TryRun();
         Move();
         CameraRotation();
         CaracterRotation();
+    }
+
+    private void TryRun()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            Running();
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            RunningCancel();
+        }
+
+    }
+
+    private void Running()
+    {
+        is_run = true;
+        apply_speed = run_speed;
+    }
+    private void RunningCancel()
+    {
+        is_run = false;
+        apply_speed = walk_speed;
     }
 
     //좌우회전
@@ -66,7 +100,7 @@ public class PlayerController : MonoBehaviour
         Vector3 move_vertical = transform.forward * move_direction_z;
 
         // normalized : 방향
-        Vector3 velocity = (move_horizontal + move_vertical).normalized * walk_speed ;
+        Vector3 velocity = (move_horizontal + move_vertical).normalized * apply_speed ;
         my_rigidbody.MovePosition(transform.position + velocity * Time.deltaTime);
     }
 }
