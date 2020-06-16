@@ -24,6 +24,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float look_sensitivity;
 
+    //앉기
+    [SerializeField]
+    private float crouch_position_y;
+    private float original_position_y;
+    private float aaply_crouch_position_y;
+
     // 카메라 한계
     [SerializeField]
     private float camera_rotaion_limit;
@@ -41,6 +47,7 @@ public class PlayerController : MonoBehaviour
         my_rigidbody = GetComponent<Rigidbody>();
         capsule_collider = GetComponent<CapsuleCollider>();
         apply_speed = walk_speed;
+        original_position_y = main_camera.transform.localPosition.y;
     }
 
     // Update is called once per frame
