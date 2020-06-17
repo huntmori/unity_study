@@ -12,10 +12,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField]    private float run_speed;
                         private float apply_speed;
 
+    [SerializeField] private float crouch_speed;
+
     [SerializeField] private float jump_force;
     private bool is_ground = true;
     // 상태변수
     private bool is_run = false;
+    private bool is_crouch = false;
 
     // 강체 - 실제 몸의 역할
     //[SerializeField]
@@ -28,7 +31,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float crouch_position_y;
     private float original_position_y;
-    private float aaply_crouch_position_y;
+    private float apply_crouch_position_y;
 
     // 카메라 한계
     [SerializeField]
@@ -48,6 +51,7 @@ public class PlayerController : MonoBehaviour
         capsule_collider = GetComponent<CapsuleCollider>();
         apply_speed = walk_speed;
         original_position_y = main_camera.transform.localPosition.y;
+        apply_crouch_position_y = original_position_y;
     }
 
     // Update is called once per frame
@@ -55,11 +59,60 @@ public class PlayerController : MonoBehaviour
     {
         IsGround();
         TryJump();
+        TryCrouch();
         TryRun();
         Move();
         CameraRotation();
         CaracterRotation();
     }
+
+    private void TryCrouch()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            Crouch();
+        }
+    }
+
+    private void Crouch()
+    {
+        is_crouch = !is_crouch;
+
+        if (is_crouch)
+        {
+            apply_speed = crouch_speed;
+            apply_crouch_position_y = crouch_position_y;
+        }
+        else
+        {
+            apply_speed = walk_speed;
+            apply_crouch_position_y = original_position_y;
+        }
+
+        StartCoroutine(CrouchCroutine());
+    }
+
+    IEnumerator CrouchCroutine()
+    {
+        float position_y = main_camera.transform.localPosition.y;
+        int count = 0;
+
+        while(position_y != apply_crouch_position_y)
+        {
+            count++;
+            //보간
+            position_y = Mathf.Lerp(position_y, apply_crouch_position_y, 0.3f);
+            main_camera.transform.localPosition = new Vector3(0, position_y, 0);
+
+            if (count > 15)
+                break;
+
+            yield return null;
+
+        }
+        main_camera.transform.localPosition = new Vector3(0, apply_crouch_position_y, 0);
+    }
+
     private void IsGround()
     {
         is_ground = Physics.Raycast(transform.position, Vector3.down, capsule_collider.bounds.extents.y + 0.1f );
