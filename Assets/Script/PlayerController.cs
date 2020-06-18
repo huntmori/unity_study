@@ -92,6 +92,7 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(CrouchCroutine());
     }
 
+    //부드러운 앉기
     IEnumerator CrouchCroutine()
     {
         float position_y = main_camera.transform.localPosition.y;
@@ -126,7 +127,10 @@ public class PlayerController : MonoBehaviour
     }
     private void Jump()
     {
-        // 0, 1, 0
+        // 앉은 상태로 점프 시 해제
+        if (is_crouch)
+            Crouch();
+
         my_rigidbody.velocity = transform.up * jump_force;
     }
     private void TryRun()
@@ -144,6 +148,9 @@ public class PlayerController : MonoBehaviour
 
     private void Running()
     {
+        if (is_crouch)
+            Crouch();
+
         is_run = true;
         apply_speed = run_speed;
     }
